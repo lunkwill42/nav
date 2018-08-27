@@ -19,15 +19,11 @@ def find_scripts():
             if handle.readline().startswith("#!"):
                 yield candidate
 
-
-class NAVBuild(build):
-    sub_commands = [
-        ('build_sass', None),
-    ] + build.sub_commands
+build.sub_commands = [('build_sass', None)] + build.sub_commands
 
 
 setup(
-    setup_requires=['libsass >= 0.6.0', 'setuptools_scm'],
+    setup_requires=['libsass', 'setuptools_scm'],
     python_requires=">=2.7",
     use_scm_version=True,
 
@@ -46,10 +42,6 @@ setup(
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     ],
 
-    cmdclass={
-        'build': NAVBuild,
-    },
-
     scripts=list(find_scripts()),
     packages=find_packages(),
     include_package_data=True,
@@ -62,8 +54,11 @@ setup(
     data_files=etc_files(),
 
     sass_manifests={
-        'nav': ('web/sass',
-                'web/static/css'),
+        'nav.web': {
+            'sass_path': 'sass',
+            'css_path': 'static/css',
+            'strip_extension': True,
+        },
     },
 
     zip_safe=False,
