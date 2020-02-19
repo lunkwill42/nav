@@ -26,3 +26,7 @@ pynetsnmp-2==0.1.5
 
 # libsass for compiling scss files to css using distutils/setuptools
 libsass==0.15.1
+
+# For 3rd party REST API access. We stick to an old version to retain Python 3.5
+# compatibility (for now)
+simple_rest_client==0.6.0
