@@ -32,16 +32,60 @@ class CNaaSNMSMixIn(ManagementHandler):
         self._api = get_api(config.url, config.token)
 
     def set_if_alias(self, if_index, if_alias):
-        raise NotImplementedError
+        iface = self._interface_name_from_index(if_index)
+        data = {"description": if_alias}
+        payload = {"interfaces": {iface: data}}
+        self._api.interfaces.configure(self.netbox.sysname, body=payload)
 
     def set_if_down(self, if_index):
-        raise NotImplementedError
+        self._set_interface_enabled(if_index, enabled=False)
 
     def set_if_up(self, if_index):
-        raise NotImplementedError
+        self._set_interface_enabled(if_index, enabled=True)
+
+    def _set_interface_enabled(self, if_index, enabled=True):
+        iface = self._interface_name_from_index(if_index)
+        data = {"enabled": enabled}
+        payload = {"interfaces": {iface: data}}
+        self._api.interfaces.configure(self.netbox.sysname, body=payload)
 
     def test_write(self):
-        raise NotImplementedError
+        # TODO: This method is defined in SNMPHandler, but is never actually called
+        response = self._api.devices.retrieve(self.netbox.sysname)
+        payload = response.body
+        if response.status_code == 200 and payload.get("status") == "success":
+            if len(payload.get("devices", []) < 0):
+                raise CNaaSNMSApiError("No devices match this name in CNaaS NMS")
+            device = payload["devices"][0]
+            return (
+                device.get("state") == "MANAGED"
+                and device.get("device_type") == "ACCESS"
+                and device.get("synchronized")
+            )
+        else:
+            raise CNaaSNMSApiError("Cannot verify device status in CNaaS NMS")
 
     def write_mem(self):
-        raise NotImplementedError
+        """Implements the 'write_mem' step as a configuration commit/sync command"""
+        payload = {"hostname": self.netbox.sysname, "dry_run": False, "auto_push": True}
+        self._api.device_sync.syncto(body=payload)
+        # TODO: Get a job number from the syncto call
+        # TODO: Poll the job API for "status": "FINISHED"
+
+    def _interface_name_from_index(self, if_index):
+        """Translates an ifIndex value to an interface name for this device.
+
+        The PortAdmin API uses ifIndex values exclusively, originally being
+        SNMP-centric, wheres the CNaaS API only cares about interface names.
+        """
+        # TODO: Verify the assumption that CNaaS NMS uses the ifDescr value.
+        ifc = self.netbox.interface_set.only("ifdescr").get(ifindex=if_index)
+        return ifc.ifdescr
+
+
+class CNaaSNMSApiError(Exception):
+    """An exception raised whenever there is a problem with the responses from the
+    CNaaS NMS API
+    """
+
+    pass
