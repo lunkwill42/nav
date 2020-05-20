@@ -22,7 +22,6 @@ def get_api(url, token):
     """Returns a CNaaS NMS API instance from a URL and a token"""
     default_headers = {
         "Authorization": "Bearer {}".format(token),
-        "Content-Type": "application/json",
     }
     api = API(
         api_root_url=url,
