@@ -49,21 +49,23 @@ class CNaaSNMSMixIn(ManagementHandler):
         payload = {"interfaces": {iface: data}}
         self._api.interfaces.configure(self.netbox.sysname, body=payload)
 
-    def test_write(self):
-        # TODO: This method is defined in SNMPHandler, but is never actually called
-        response = self._api.devices.retrieve(self.netbox.sysname)
+    def _get_device_record(self):
+        response = self._api.devices.retrieve(self.netbox.ip)
         payload = response.body
         if response.status_code == 200 and payload.get("status") == "success":
-            if len(payload.get("devices", []) < 0):
-                raise CNaaSNMSApiError("No devices match this name in CNaaS NMS")
-            device = payload["devices"][0]
-            return (
-                device.get("state") == "MANAGED"
-                and device.get("device_type") == "ACCESS"
-                and device.get("synchronized")
-            )
+            data = payload.get("data", {})
+            if len(data.get("devices", [])) < 0:
+                raise CNaaSNMSApiError(
+                    "No devices matched {} in CNaaS-NMS".format(self.netbox.ip)
+                )
+            device = data["devices"][0]
+            return device
         else:
-            raise CNaaSNMSApiError("Cannot verify device status in CNaaS NMS")
+            raise CNaaSNMSApiError(
+                "Unknown failure when talking to CNaaS-NMS (code={}, status={})".format(
+                    response.status_code, payload.get("status")
+                )
+            )
 
     def write_mem(self):
         """Implements the 'write_mem' step as a configuration commit/sync command"""
