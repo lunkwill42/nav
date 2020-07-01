@@ -48,6 +48,7 @@ from nav.Snmp.errors import SnmpError, TimeOutException
 from nav.portadmin.snmp.base import SNMPHandler
 from nav.portadmin.management import ManagementFactory
 from .forms import SearchForm
+from ...portadmin.handlers import DeviceNotConfigurableError
 
 _logger = logging.getLogger("nav.web.portadmin")
 
@@ -200,7 +201,7 @@ def populate_infodict(request, netbox, interfaces):
         messages.error(request, "SNMP error when contacting %s. Values "
                                 "displayed are from database" % netbox.sysname)
 
-    if check_read_write(netbox, request):
+    if check_read_write(fac, request):
         readonly = True
 
     ifaliasformat = CONFIG.get_ifaliasformat()
@@ -278,17 +279,19 @@ def set_voice_vlan_attribute_cisco(voice_vlan, interfaces, fac):
         interface.voice_activated = voice_activated
 
 
-def check_read_write(netbox, request):
-    """Add a message to user explaining why he can't edit anything
+def check_read_write(mgmt_handler, request):
+    """Add a message to user explaining why they can't edit anything.
 
+    :type mgmt_handler: nav.portadmin.handlers.ManagementHandler
     :returns: flag indicating readonly or not
     """
-    if not netbox.read_write:
-        messages.error(request,
-                       "Write community not set for this device, "
-                       "changes cannot be saved")
+    try:
+        mgmt_handler.raise_if_not_configurable()
+    except DeviceNotConfigurableError as error:
+        messages.error(request, str(error))
         return True
-    return False
+    else:
+        return False
 
 
 def save_interfaceinfo(request):
