@@ -41,7 +41,7 @@ def get_api(url, token):
 
 class DeviceResource(Resource):
     """Defines operations on the devices endpoint"""
-    actions = {"retrieve": {"method": "GET", "url": "/devices?filter[hostname]={}"}}
+    actions = {"retrieve": {"method": "GET", "url": "/devices?filter[management_ip]={}"}}
 
 
 class InterfaceResource(Resource):
