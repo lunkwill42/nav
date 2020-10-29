@@ -29,4 +29,4 @@ libsass==0.15.1
 
 napalm==3.0.1
 
-requests==2.23.0  # To access Argus API
+argus-api-client==0.2
