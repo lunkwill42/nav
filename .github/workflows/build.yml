@@ -1,0 +1,23 @@
+name: Test NAV
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: "Build NAV"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: "Install dependencies"
+        run: |
+          set -xe
+          python -m pip install --upgrade pip setuptools wheel tox tox-gh-actions coverage virtualenv
+
+
+      - name: "Run unit tests"
+        run: |
+          testenvs=$(python -m tox -a | egrep 'unit-')
+          for testenv in $testenvs; do
+            python -m tox -e $testenv
+          done
