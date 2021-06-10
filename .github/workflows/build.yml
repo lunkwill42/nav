@@ -25,9 +25,6 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel tox tox-gh-actions coverage virtualenv
 
 
-      - name: "Run unit tests"
+      - name: "Run tests"
         run: |
-          testenvs=$(python -m tox -a | egrep 'unit-')
-          for testenv in $testenvs; do
-            python -m tox -e $testenv
-          done
+          python -m tox
