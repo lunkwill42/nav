@@ -30,6 +30,7 @@ jobs:
       - name: "Set environment variables"
         run: |
           echo "WORKSPACE=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+          echo "PGHOST=localhost" >> $GITHUB_ENV
           echo "PGUSER=nav" >> $GITHUB_ENV
           echo "PGPASSWORD=password" >> $GITHUB_ENV
 
