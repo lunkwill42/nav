@@ -66,3 +66,11 @@ jobs:
         run: |
           export DISPLAY=:99
           python -m tox
+
+      - name: Archive test logs
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: pytest-logs
+          path: |
+            /tmp/pytest-of-runner
