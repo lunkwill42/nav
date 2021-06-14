@@ -33,6 +33,13 @@ jobs:
           echo "PGHOST=localhost" >> $GITHUB_ENV
           echo "PGUSER=nav" >> $GITHUB_ENV
           echo "PGPASSWORD=password" >> $GITHUB_ENV
+          echo "=== Environment ==="
+          env | sort
+          echo "=== Working dir ==="
+          pwd
+          echo "=== Contents ==="
+          ls -la
+
 
       - name: "Install test runner dependencies"
         run: |
