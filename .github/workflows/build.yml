@@ -75,3 +75,11 @@ jobs:
           name: pytest-logs
           path: |
             /tmp/pytest-of-runner
+
+      - name: Archive test reports
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-reports
+          path: |
+            reports/**/*
