@@ -60,6 +60,7 @@ def snmp_agent_proxy(snmpsim):
     return agent
 
 
+@pytest.mark.skip(reason="Segfault in libsnmp")
 @pytest.mark.twisted
 @pytest_twisted.inlineCallbacks
 def test_apc_pdu(snmp_agent_proxy):
@@ -101,6 +102,7 @@ def test_apc_pdu(snmp_agent_proxy):
     ]
 
 
+@pytest.mark.skip(reason="Segfault in libsnmp")
 @pytest.mark.twisted
 @pytest_twisted.inlineCallbacks
 def test_P8652(snmp_agent_proxy):
@@ -221,6 +223,7 @@ def test_P8652(snmp_agent_proxy):
     ]
 
 
+@pytest.mark.skip(reason="Segfault in libsnmp")
 @pytest.mark.twisted
 @pytest_twisted.inlineCallbacks
 def test_raritan_pdu(snmp_agent_proxy):
