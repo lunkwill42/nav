@@ -54,7 +54,7 @@ def get_root_method():
     if os.geteuid() == 0:
         return []
     elif os.system("sudo true") == 0:
-        return ["sudo"]
+        return ["sudo", "-E"]
     elif os.system("gosu root true") == 0:
         return ["gosu", "root"]
     else:
