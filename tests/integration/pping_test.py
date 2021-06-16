@@ -24,6 +24,7 @@ def can_be_root():
         return False
 
 
+@pytest.mark.timeout(20)
 @pytest.mark.skipif(
     can_be_root(), reason="pping can only be tested with root privileges"
 )
@@ -32,6 +33,7 @@ def test_pping_localhost_should_work(localhost, pping_test_config):
     assert "0 hosts currently marked as down" in output
 
 
+@pytest.mark.timeout(20)
 @pytest.mark.skipif(
     can_be_root(), reason="pping can only be tested with root privileges"
 )
@@ -70,19 +72,19 @@ def get_pping_output(timeout=5):
     """
     pping = which('pping.py')
     assert pping, "Cannot find pping.py on path"
-    cmd = get_root_method() + [pping, '-f']
+    cmd = get_root_method() + ["/usr/bin/timeout", str(timeout), pping, "-f"]
     try:
-        output = check_output(cmd, stderr=STDOUT, timeout=timeout)
-    except TimeoutExpired as error:
-        # this is the normal case, since we need to kill pping after the timeout
-        print(error.output.decode('utf-8'))
-        return error.output.decode('utf-8')
+        output = check_output(cmd, stderr=STDOUT)
     except CalledProcessError as error:
+        if error.returncode == 124:  # timeout
+            # this is the normal case, since we need to kill pping after the timeout
+            print(error.output.decode('utf-8'))
+            return error.output.decode('utf-8')
         print(error.output.decode('utf-8'))
         raise
     else:
         print(output)
-        assert False, "pping exited with non-zero status"
+        assert False, "pping exited unexpectedly"
 
 
 @pytest.fixture()
