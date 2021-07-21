@@ -102,6 +102,17 @@ jobs:
           path: |
             /tmp/core-*
 
+      - name: Try to print tracebacks of core dumps (${{ matrix.python-version }})
+        if: failure()
+        run: |
+          sudo apt-get install -y gdb
+          for core in /tmp/core-*; do
+            echo "===== CORE: $core ====="
+            execfn=$(file "$core" | sed -e 's/.*execfn: //' -e 's/, .*$//' | tr -d "'")
+            gdb -ex bt "$execfn" "$core"
+            echo
+          done
+
   publish-test-results:
     name: "Publish test results"
     needs: build-and-test
