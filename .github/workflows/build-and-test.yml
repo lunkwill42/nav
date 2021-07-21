@@ -108,7 +108,10 @@ jobs:
           sudo apt-get install -y gdb
           for core in /tmp/core-*; do
             echo "===== CORE: $core ====="
+            file "$core"
+            echo
             execfn=$(file "$core" | sed -e 's/.*execfn: //' -e 's/, .*$//' | tr -d "'")
+            echo "# execfn: $execfn"
             gdb -ex bt "$execfn" "$core"
             echo
           done
