@@ -8,7 +8,7 @@ pytest==5.3.3
 pytest-cov==2.12.1
 pytest-selenium==2.0.1
 pytest-timeout
-pytest-twisted==1.12
+pytest-twisted==1.13.2
 pytidylib==0.3.2
 selenium==3.141.0
 whisper>=0.9.9
