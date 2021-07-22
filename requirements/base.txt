@@ -19,7 +19,7 @@ dnspython==1.15.0
 # REST framework
 iso8601
 
-pynetsnmp-2==0.1.5
+git+https://github.com/lunkwill42/pynetsnmp@bugfix/pdu-msgmaxsize
 
 # libsass for compiling scss files to css using distutils/setuptools
 libsass==0.15.1
