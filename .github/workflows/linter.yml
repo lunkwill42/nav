@@ -50,9 +50,12 @@ jobs:
       - name: Lint Code Base
         uses: github/super-linter@v4
         env:
-          VALIDATE_ALL_CODEBASE: true
+          VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_PYTHON: true
-          LINTER_RULES_PATH: /python
-          PYTHON_PYLINT_CONFIG_FILE: pylint.rc
+          VALIDATE_PYTHON_ISORT: false
+          VALIDATE_PYTHON_MYPY: false
+          PYTHON_PYLINT_CONFIG_FILE: python/pylint.rc
+          LINTER_RULES_PATH: /
+          PYTHON_BLACK_CONFIG_FILE: pyproject.toml
