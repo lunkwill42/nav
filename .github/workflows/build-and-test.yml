@@ -87,11 +87,6 @@ jobs:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
 
-      - name: "PyLint"
-        uses: fylein/python-pylint-github-action@v4
-        with:
-          args: pip install pylint-exit && pylint python/nav --jobs=4 --rcfile=python/pylint.rc --disable=I,similarities --load-plugins pylint_django || pylint-exit $?
-
       - name: Upload test reports (${{ matrix.python-version }})
         if: always()
         uses: actions/upload-artifact@v2
