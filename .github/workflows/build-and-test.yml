@@ -50,6 +50,10 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel tox tox-gh-actions coverage virtualenv snmpsim
           sudo apt-get install -y nbtscan
 
+      - name: "Upgrade embedded virtualenv wheels"
+        run: |
+          virtualenv --upgrade-embed-wheel
+
       - name: "Install libraries needed to build external dependencies"
         run: |
           set -xe
