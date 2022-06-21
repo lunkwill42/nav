@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Uninett AS
+# Copyright (C) 2022 Sikt
 #
 # This file is part of Network Administration Visualized (NAV).
 #
@@ -65,6 +65,7 @@ class JuniperVCMib(mibretriever.MibRetriever):
 @dataclass
 class VirtualChassisMember:
     """Describes a member of a Juniper Virtual Chassis"""
+
     id: int
     serial_number: str
     role: str
