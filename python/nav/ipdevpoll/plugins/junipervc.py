@@ -90,7 +90,7 @@ class JuniperVC(Plugin):
         entity.device = device
         entity.index = member.id
         entity.name = member.id
-        entity.descr = member.alias
+        entity.descr = member.alias or f"VC member {member.id}"
         entity.physical_class = manage.NetboxEntity.CLASS_CHASSIS
         entity.model_name = member.model
         entity.software_revision = member.sw_version
