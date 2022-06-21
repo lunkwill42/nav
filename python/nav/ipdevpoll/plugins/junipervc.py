@@ -47,14 +47,26 @@ class JuniperVC(Plugin):
             self._process_members(members)
 
     def _process_members(self, members: List[VirtualChassisMember]):
-        # We fake a stack entry, as it's required by parts of NAV
-        netbox = self.containers.factory(None, shadows.Netbox)
-        stack_key = "{}:VC".format(SOURCE)
-        stack = self.containers.factory(
-            stack_key, shadows.NetboxEntity, netbox=netbox, index=-1
-        )
+        stack = self._get_faked_stack_entity()
         for member in members:
             self._process_member(member, stack)
+
+    def _get_faked_stack_entity(self):
+        """Returns a 'fake' stack entity to which stack members can be attached.
+        Although the concept comes from the ENTITY-MIB, parts of NAV require this
+        parent entity to be present to properly process stack member chassis.
+        """
+        netbox = self.containers.factory(None, shadows.Netbox)
+        stack_key = "{}:VC".format(SOURCE)
+        return self.containers.factory(
+            stack_key,
+            shadows.NetboxEntity,
+            netbox=netbox,
+            index=-1,
+            source=SOURCE,
+            physical_class=NetboxEntity.CLASS_STACK,
+            descr="Juniper Virtual Chassis Stack",
+        )
 
     def _process_member(
         self, member: VirtualChassisMember, stack: shadows.NetboxEntity
