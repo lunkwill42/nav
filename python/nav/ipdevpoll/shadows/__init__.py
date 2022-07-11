@@ -29,7 +29,7 @@ from django.db.models import Q
 from nav.models import manage
 from nav.event2 import EventFactory
 
-from nav.ipdevpoll.storage import MetaShadow, Shadow, shadowify
+from nav.ipdevpoll.storage import MetaShadow, Shadow, shadowify, ContainerRepository
 from nav.ipdevpoll import descrparsers
 from nav.ipdevpoll import utils
 
@@ -115,8 +115,46 @@ class Module(Shadow):
 
     @classmethod
     def prepare_for_save(cls, containers):
+        cls._remove_modules_that_are_also_chassis(containers)
         cls._resolve_actual_duplicate_names(containers)
         return super(Module, cls).prepare_for_save(containers)
+
+    @classmethod
+    def _remove_modules_that_are_also_chassis(cls, containers: ContainerRepository):
+        """Removes all modules from the container repository that appear to also
+        be registered as chassis devices.
+
+        This is needed mostly for Juniper devices, where ENTITY-MIB tends to model
+        virtual chassis members not as chassis, but as modules - while they will
+        properly be registered as chassis entities when found in the "competing"
+        JUNIPER-VIRTUALCHASSIS-MIB.
+        """
+        chassis_devices = set(cls._get_chassis_devices(containers))
+        modules = dict(containers[cls].items())
+        modules_by_device = {m.device: m for m in modules.values()}
+        duplicates = set(modules_by_device) & chassis_devices
+
+        if duplicates:
+            cls._logger.debug(
+                "These devices appear both as modules and chassis: %r", duplicates
+            )
+            to_delete = {
+                module
+                for device, module in modules_by_device.items()
+                if device in duplicates
+            }
+            cls._logger.debug("Ignoring these modules: %r", to_delete)
+            for key, module in modules.items():
+                if module in to_delete:
+                    del containers[cls][key]
+
+    @classmethod
+    def _get_chassis_devices(cls, containers):
+        """Returns a list of Device objects that map to chassis entities in the current
+        container repository.
+        """
+        chassis = NetboxEntity.get_chassis_entities(containers)
+        return [c.device for c in chassis]
 
     @classmethod
     def _resolve_actual_duplicate_names(cls, containers):
