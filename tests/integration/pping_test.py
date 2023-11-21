@@ -2,6 +2,7 @@
 various pping integration tests
 """
 import os
+import sys
 from pathlib import Path
 import getpass
 from shutil import which
@@ -18,7 +19,7 @@ from nav.models.event import EventQueue
 from nav.config import find_config_file
 
 
-BINDIR = './python/nav/bin'
+BINDIR = Path('./python/nav/bin').absolute()
 
 
 def can_be_root():
@@ -76,7 +77,12 @@ def get_root_method():
     if os.geteuid() == 0:
         return []
     elif os.system("sudo true") == 0:
-        return ["sudo", "-E"]
+        sys.path.append(str(BINDIR))
+        pythonpath = ":".join(sys.path)
+        if pythonpath[0] != ":":
+            pythonpath = ":" + pythonpath
+        pythonpath = str(BINDIR) + pythonpath
+        return ["sudo", "-E", "PYTHONPATH=%s" % pythonpath]
     elif os.system("gosu root true") == 0:
         return ["gosu", "root"]
     else:
@@ -90,7 +96,7 @@ def get_pping_output(timeout=5):
 
     Also asserts that pping shouldn't unexpectedly exit with a zero exitcode.
     """
-    pping = Path(BINDIR).absolute() / 'pping.py'
+    pping = BINDIR / 'pping.py'
     assert pping.exists(), "Cannot find pping.py on path"
     pping = str(pping)
     cmd = get_root_method() + ["/usr/bin/timeout", str(timeout), pping, "-f"]
