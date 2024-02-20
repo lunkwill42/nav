@@ -100,6 +100,12 @@ def get_pping_output(timeout=5):
     assert pping.exists(), "Cannot find pping.py on path"
     pping = str(pping)
     cmd = get_root_method() + ["/usr/bin/timeout", str(timeout), pping, "-f"]
+    print('PATH:')
+    for piece in os.environ.get('PATH', '').split(':'):
+        print(piece)
+    print('PYTHONPATH:')
+    for piece in sys.path:
+        print(piece)
     try:
         output = check_output(cmd, stderr=STDOUT)
     except CalledProcessError as error:
