@@ -77,6 +77,9 @@ def get_root_method():
     if os.geteuid() == 0:
         return []
     elif os.system("sudo true") == 0:
+        os_path = os.environ.get("PATH", "")
+        if not str(BINDIR) in os_path:
+            os_path = str(BINDIR) + ':' + os_path
         print("get_root_method PYTHONPATH:")
         for piece in sys.path:
             print(piece)
@@ -88,7 +91,7 @@ def get_root_method():
         print("get_root_method PYTHONPATH shown to sudo:")
         for piece in pythonpath.split(":"):
             print(piece if piece else "EMPTY STRING")
-        return ["sudo", "-E", "PYTHONPATH=%s" % pythonpath]
+        return ["sudo", "-E", "PYTHONPATH=%s PATH=%s" % (pythonpath, os_path)]
     elif os.system("gosu root true") == 0:
         return ["gosu", "root"]
     else:
