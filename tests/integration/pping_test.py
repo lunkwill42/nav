@@ -77,11 +77,17 @@ def get_root_method():
     if os.geteuid() == 0:
         return []
     elif os.system("sudo true") == 0:
+        print("get_root_method PYTHONPATH:")
+        for piece in sys.path:
+            print(piece)
         sys.path.append(str(BINDIR))
         pythonpath = ":".join(sys.path)
         if pythonpath[0] != ":":
             pythonpath = ":" + pythonpath
         pythonpath = str(BINDIR) + pythonpath
+        print("get_root_method PYTHONPATH shown to sudo:")
+        for piece in pythonpath.split(":"):
+            print(piece if piece else "EMPTY STRING")
         return ["sudo", "-E", "PYTHONPATH=%s" % pythonpath]
     elif os.system("gosu root true") == 0:
         return ["gosu", "root"]
@@ -100,10 +106,10 @@ def get_pping_output(timeout=5):
     assert pping.exists(), "Cannot find pping.py on path"
     pping = str(pping)
     cmd = get_root_method() + ["/usr/bin/timeout", str(timeout), pping, "-f"]
-    print('PATH:')
-    for piece in os.environ.get('PATH', '').split(':'):
+    print("PATH:")
+    for piece in os.environ.get("PATH", "").split(":"):
         print(piece)
-    print('PYTHONPATH:')
+    print("PYTHONPATH:")
     for piece in sys.path:
         print(piece)
     try:
