@@ -2,8 +2,6 @@
 various pping integration tests
 """
 import os
-import sys
-from pathlib import Path
 import getpass
 from shutil import which
 
@@ -17,9 +15,6 @@ import pytest
 from nav.models.manage import Netbox, NetboxProfile
 from nav.models.event import EventQueue
 from nav.config import find_config_file
-
-
-BINDIR = Path('./python/nav/bin').absolute()
 
 
 def can_be_root():
@@ -77,21 +72,7 @@ def get_root_method():
     if os.geteuid() == 0:
         return []
     elif os.system("sudo true") == 0:
-        os_path = os.environ.get("PATH", "")
-        if not str(BINDIR) in os_path:
-            os_path = str(BINDIR) + ':' + os_path
-        print("get_root_method PYTHONPATH:")
-        for piece in sys.path:
-            print(piece)
-        sys.path.append(str(BINDIR))
-        pythonpath = ":".join(sys.path)
-        if pythonpath[0] != ":":
-            pythonpath = ":" + pythonpath
-        pythonpath = str(BINDIR) + pythonpath
-        print("get_root_method PYTHONPATH shown to sudo:")
-        for piece in pythonpath.split(":"):
-            print(piece if piece else "EMPTY STRING")
-        return ["sudo", "-E", "PYTHONPATH=%s PATH=%s" % (pythonpath, os_path)]
+        return ["sudo", "-E"]
     elif os.system("gosu root true") == 0:
         return ["gosu", "root"]
     else:
@@ -105,16 +86,9 @@ def get_pping_output(timeout=5):
 
     Also asserts that pping shouldn't unexpectedly exit with a zero exitcode.
     """
-    pping = BINDIR / 'pping.py'
-    assert pping.exists(), "Cannot find pping.py on path"
-    pping = str(pping)
+    pping = which('pping.py')
+    assert pping, "Cannot find pping.py on path"
     cmd = get_root_method() + ["/usr/bin/timeout", str(timeout), pping, "-f"]
-    print("PATH:")
-    for piece in os.environ.get("PATH", "").split(":"):
-        print(piece)
-    print("PYTHONPATH:")
-    for piece in sys.path:
-        print(piece)
     try:
         output = check_output(cmd, stderr=STDOUT)
     except CalledProcessError as error:
