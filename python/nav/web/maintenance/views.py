@@ -384,7 +384,9 @@ def component_search(request):
             component_title = component_type._meta.verbose_name.title()
             results[component_title] = component_result
 
-    return render(request, 'maintenance/search-results.html', {'results': results})
+    return render(
+        request, 'maintenance/component-search-results-frag.html', {'results': results}
+    )
 
 
 def add_box_to_maintenance(request):
