@@ -50,7 +50,7 @@
             </h3>
             <input class="form-control" type="search"
                    name="search" placeholder="Begin Typing To Search for stuff..."
-                   hx-post="{% url 'maintenance-crazy-shit' %}"
+                   hx-post="{% url 'maintenance-component-search' %}"
                    hx-trigger="input changed delay:500ms, search"
                    hx-target="#search-results"
                    hx-indicator=".htmx-indicator">
