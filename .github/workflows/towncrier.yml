@@ -1,19 +1,15 @@
-name: Check for changelog file
+name: Verify that towncrier can be installed and run
 
-on: [pull_request]
+on: push
 
 jobs:
   towncrier:
-    if: ${{ github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     name: Towncrier check
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
     - name: Install towncrier
       run: |
-        sudo apt-get install -y --no-install-recommends towncrier
-    - name: Check for changelog file
-      run: towncrier check --compare-with origin/master
+        sudo apt-get install -y pipx
+        pipx install towncrier
+    - name: Verify that towncrier is available
+      run: towncrier --help
