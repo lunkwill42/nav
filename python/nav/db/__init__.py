@@ -25,15 +25,14 @@ import os
 import sys
 import time
 
-import psycopg2
-import psycopg2.extensions
+import psycopg
 
 import nav
 from nav import config
 
 _logger = logging.getLogger('nav.db')
 _connection_cache = nav.ObjectCache()
-driver = psycopg2
+driver = psycopg
 
 
 class ConnectionObject(nav.CacheableObject):
@@ -57,13 +56,13 @@ class ConnectionObject(nav.CacheableObject):
                 if self.ping():
                     self.last_validated = time.time()
                     return False
-            except (psycopg2.ProgrammingError, psycopg2.OperationalError):
+            except (psycopg.ProgrammingError, psycopg.OperationalError):
                 _logger.debug(
                     'Invalid connection object (%r), age=%s', self.key, self.age()
                 )
                 self.object.close()
                 return True
-        except psycopg2.InterfaceError:
+        except psycopg.InterfaceError:
             _logger.debug('Connection may already be closed (%r)', self.key)
             return True
 
@@ -85,9 +84,10 @@ def escape(string):
     ..warning:: You should be using parameterized queries if you can!
 
     """
-    quoted = psycopg2.extensions.QuotedString(string)
-    result = quoted.getquoted()
-    return result if isinstance(result, str) else result.decode("utf-8")
+    if isinstance(string, bytes):
+        string = string.decode("utf-8")
+    escaped = string.replace("'", "''")
+    return "'" + escaped + "'"
 
 
 def get_connection_parameters(script_name='default', database='nav'):
@@ -171,7 +171,7 @@ def getConnection(scriptName, database='nav'):
     try:
         connection = _connection_cache[cache_key].object
     except KeyError:
-        connection = psycopg2.connect(
+        connection = psycopg.connect(
             get_connection_string((dbhost, port, dbname, user, password))
         )
         _logger.debug(
@@ -180,9 +180,8 @@ def getConnection(scriptName, database='nav'):
             dbname,
             user,
         )
-        # Se transaction isolation level READ COMMITTED
-        connection.set_isolation_level(1)
-        connection.set_client_encoding('utf8')
+        # Set transaction isolation level READ COMMITTED
+        connection.isolation_level = psycopg.IsolationLevel.READ_COMMITTED
         conn_object = ConnectionObject(connection, cache_key)
         _connection_cache.cache(conn_object)
 
@@ -194,7 +193,7 @@ def closeConnections():
     for connection in _connection_cache.values():
         try:
             connection.object.close()
-        except psycopg2.InterfaceError:
+        except psycopg.InterfaceError:
             pass
 
 
@@ -221,7 +220,7 @@ def retry_on_db_loss(count=3, delay=2, fallback=None, also_handled=None):
     """
     if fallback:
         assert callable(fallback)
-    handled = (psycopg2.OperationalError, psycopg2.InterfaceError)
+    handled = (psycopg.OperationalError, psycopg.InterfaceError)
     if also_handled:
         handled = handled + tuple(also_handled)
 

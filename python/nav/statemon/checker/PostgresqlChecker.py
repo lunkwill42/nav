@@ -16,7 +16,7 @@
 #
 """PostgreSQL service checker"""
 
-import psycopg2
+import psycopg
 from nav.statemon.abstractchecker import AbstractChecker
 from nav.statemon.event import Event
 
@@ -52,7 +52,7 @@ class PostgresqlChecker(AbstractChecker):
         (kwargs['host'], kwargs['port']) = self.get_address()
 
         try:
-            psycopg2.connect(**kwargs)
+            psycopg.connect(**kwargs)
         except Exception as err:  # noqa: BLE001
             # Get first line of exception message
             msg = str(err).split('\n')[0]
